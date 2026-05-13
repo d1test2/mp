@@ -1,0 +1,115 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Tier {
+  PREMIUM
+  ELITE
+  PPIC
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum CourseCategory {
+  GETTING_STARTED
+  SOURCING
+  FINANCING
+  LEGAL
+  MANAGEMENT
+  ADVANCED
+}
+
+enum PaymentStatus {
+  ACTIVE
+  CANCELED
+  PAST_DUE
+  UNPAID
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  email              String   @unique
+  passwordHash      String
+  role               UserRole @default(USER)
+
+  tier               Tier      @default(PREMIUM)
+  membershipActive   Boolean   @default(false)
+  stripeCustomerId   String?  @unique
+  stripeSubscriptionId String? @unique
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  videoProgress     UserVideoProgress[]
+
+  @@index([membershipActive])
+  @@index([tier])
+}
+
+model CourseCategoryModel {
+  id          CourseCategory @id
+  title       String
+  slug        String @unique
+  courses     Course[]
+}
+
+model Course {
+  id          String @id @default(cuid())
+  title       String
+  slug        String @unique
+  description String
+
+  categoryId  CourseCategoryModel[CourseCategoryModel] @relation(fields: [categoryId], references: [id])
+  category    CourseCategoryModel @relation(fields: [categoryId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  videos      Video[]
+
+  @@index([categoryId])
+}
+
+model Video {
+  id          String @id @default(cuid())
+  courseId   String
+  title       String
+  slug        String
+  videoUrl   String
+
+  transcript  String?
+  resources   Json?
+  sortOrder   Int @default(0)
+
+  course      Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  progresses  UserVideoProgress[]
+
+  @@index([courseId])
+}
+
+model UserVideoProgress {
+  id          String @id @default(cuid())
+  userId      String
+  videoId     String
+  positionSec Int    @default(0)
+  completed   Boolean @default(false)
+  completedAt DateTime?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video       Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@index([userId])
+}
+

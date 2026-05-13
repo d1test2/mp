@@ -1,0 +1,9 @@
+{
+  "name": "ppamp",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
+

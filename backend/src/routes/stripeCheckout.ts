@@ -1,0 +1,45 @@
+import { Router } from 'express';
+import Stripe from 'stripe';
+import { z } from 'zod';
+
+import { requireAuth } from '../middleware/requireAuth.js';
+import { requireEnv } from '../utils/requireEnv.js';
+
+export const stripeCheckoutRouter = Router();
+
+const STRIPE_SECRET_KEY = requireEnv('STRIPE_SECRET_KEY');
+
+const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
+
+const bodySchema = z.object({
+  tier: z.enum(['PREMIUM', 'ELITE'])
+});
+
+stripeCheckoutRouter.post('/create-checkout-session', requireAuth, async (req: any, res: any) => {
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { tier } = parsed.data;
+
+  const premiumPriceId = requireEnv('STRIPE_PRICE_PREMIUM');
+  const elitePriceId = requireEnv('STRIPE_PRICE_ELITE');
+
+  const priceId = tier === 'PREMIUM' ? premiumPriceId : elitePriceId;
+
+  const session = await stripe.checkout.sessions.create({
+    mode: 'subscription',
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: process.env.STRIPE_SUCCESS_URL ?? 'http://localhost:5173/dashboard?success=1',
+    cancel_url: process.env.STRIPE_CANCEL_URL ?? 'http://localhost:5173/?canceled=1',
+    metadata: {
+      userId: req.user!.id,
+      tier
+    },
+    subscription_data: {
+      metadata: { tier }
+    }
+  });
+
+  res.json({ url: session.url, id: session.id });
+});
+
