@@ -1,10 +1,9 @@
 import React from 'react';
 import { useState } from 'react';
 
-
 const tiers = [
-  { key: 'PREMIUM', label: 'Premium', price: '£20', features: ['Course access', 'Progress tracking'] },
-  { key: 'ELITE', label: 'Elite', price: '£99', features: ['Everything in Premium', 'Advanced courses'] }
+  { key: 'PREMIUM', label: 'Premium', price: '£99', features: ['Course access', 'Progress tracking'] },
+  { key: 'ELITE', label: 'Elite', price: '£49', features: ['Everything in Premium', 'Advanced courses'] }
 ];
 
 type Tier = 'PREMIUM' | 'ELITE';
@@ -17,21 +16,21 @@ export default function Landing() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        // Allow guest checkout by redirecting to a lightweight login route
-        // (Stripe will create a session only for authenticated users on backend).
         window.location.href = '/login';
         return;
       }
 
-
-      const resp = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:4000'}/api/stripe/create-checkout-session`, {
-        method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ tier })
-      });
+      const resp = await fetch(
+        `${import.meta.env.VITE_API_BASE ?? 'http://localhost:4000'}/api/stripe/create-checkout-session`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ tier })
+        }
+      );
 
       if (!resp.ok) {
         const data = await resp.json().catch(() => ({}));
@@ -46,7 +45,6 @@ export default function Landing() {
       setLoading(false);
     }
   }
-
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100">
