@@ -17,9 +17,12 @@ export default function Landing() {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        alert('Please login first.');
+        // Allow guest checkout by redirecting to a lightweight login route
+        // (Stripe will create a session only for authenticated users on backend).
+        window.location.href = '/login';
         return;
       }
+
 
       const resp = await fetch(`${import.meta.env.VITE_API_BASE ?? 'http://localhost:4000'}/api/stripe/create-checkout-session`, {
         method: 'POST',
