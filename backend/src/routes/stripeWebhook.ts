@@ -19,14 +19,23 @@ const stripe = new Stripe(STRIPE_SECRET_KEY, { apiVersion: '2024-06-20' });
 // We override the body parsing by using express.raw() in index.ts.
 webhookRouter.post('/webhook', async (req: any, res: any) => {
   const sig = req.headers['stripe-signature'];
-  if (!sig || typeof sig !== 'string') return res.status(400).send('Missing stripe-signature');
+  console.log('[Webhook] Received request. Signature present:', !!sig);
+  
+  if (!sig || typeof sig !== 'string') {
+    console.error('[Webhook] Missing stripe-signature header');
+    return res.status(400).send('Missing stripe-signature');
+  }
 
-  const rawBody = req.body as any;
+  const rawBody = req.body;
+  console.log('[Webhook] Raw body length:', rawBody?.length);
 
   let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(rawBody, sig, STRIPE_WEBHOOK_SECRET);
+    console.log('[Webhook] Event verified successfully:', event.type);
   } catch (err: any) {
+    console.error('[Webhook] Signature verification failed:', err.message);
+    console.error('[Webhook] Using Secret (first 5 chars):', STRIPE_WEBHOOK_SECRET.substring(0, 5) + '...');
     return res.status(400).send(`Webhook Error: ${err.message}`);
   }
 

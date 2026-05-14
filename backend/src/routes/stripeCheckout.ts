@@ -35,11 +35,15 @@ stripeCheckoutRouter.post('/create-checkout-session', async (req: any, res: any)
 
   const priceId = tier === 'PREMIUM' ? premiumPriceId : elitePriceId;
 
+  const origin = req.headers.origin || 'http://localhost:5173';
+  const successUrl = process.env.STRIPE_SUCCESS_URL || `${origin}/dashboard?success=1`;
+  const cancelUrl = process.env.STRIPE_CANCEL_URL || `${origin}/?canceled=1`;
+
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: process.env.STRIPE_SUCCESS_URL ?? 'http://localhost:5173/dashboard?success=1',
-    cancel_url: process.env.STRIPE_CANCEL_URL ?? 'http://localhost:5173/?canceled=1',
+    success_url: successUrl,
+    cancel_url: cancelUrl,
     metadata: {
       // guest checkout userId is injected by frontend (required)
       userId: req.body.userId,
