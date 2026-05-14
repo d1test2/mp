@@ -10,7 +10,7 @@ import CourseDetail from './pages/CourseDetail';
 
 export default function App() {
   return (
-    <div className="bg-slate-950 min-h-screen">
+    <div className="bg-[#F8FAFC] min-h-screen">
       <Navbar />
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -23,5 +23,3 @@ export default function App() {
     </div>
   );
 }
-
-

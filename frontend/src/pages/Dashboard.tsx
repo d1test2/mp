@@ -58,14 +58,6 @@ export default function Dashboard() {
             <p className="mt-2 text-lg text-slate-500">Your property investment journey continues here.</p>
           </div>
           <div className="flex gap-4">
-            {user?.role === 'ADMIN' && (
-              <Link
-                to="/admin"
-                className="inline-flex items-center gap-3 rounded-2xl bg-white border-2 border-slate-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-900 hover:bg-slate-50 transition-all hover:scale-105 active:scale-95"
-              >
-                Admin Console
-              </Link>
-            )}
             <Link
               to="/courses"
               className="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all hover:scale-105 active:scale-95"
@@ -75,18 +67,21 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Admin Special Section */}
+        {/* Admin ULTRA PROMINENT Section */}
         {user?.role === 'ADMIN' && (
-          <section className="mb-12 rounded-[3rem] bg-emerald-600 p-10 text-white shadow-2xl shadow-emerald-200 relative overflow-hidden group">
+          <section className="mb-16 rounded-[3rem] bg-slate-900 p-12 text-white shadow-3xl relative overflow-hidden group border-4 border-emerald-500/20">
             <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
-               <svg className="h-40 w-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+               <svg className="h-64 w-64 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
             </div>
             <div className="relative z-10">
-              <h2 className="text-3xl font-black tracking-tight mb-4">Academy Governance</h2>
-              <p className="max-w-xl text-lg font-medium opacity-90 mb-8">You have full administrative control. Upload new courses, manage member tiers, and oversee platform growth from the console.</p>
-              <Link to="/admin" className="inline-flex items-center gap-3 rounded-xl bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-all">
-                Enter Admin Console
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7-7 7M3 12h18"/></svg>
+              <span className="inline-block rounded-full bg-emerald-500 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-white mb-6">Administrator Access Only</span>
+              <h2 className="text-4xl font-black tracking-tight mb-4">Academy Governance & Content</h2>
+              <p className="max-w-2xl text-xl font-medium text-slate-300 mb-10 leading-relaxed">
+                You are currently in Admin Mode. You can manage the student directory, upgrade member tiers, create new modules, and upload lessons.
+              </p>
+              <Link to="/admin" className="inline-flex items-center gap-4 rounded-2xl bg-emerald-600 px-10 py-5 text-sm font-black uppercase tracking-widest text-white hover:bg-emerald-500 transition-all shadow-xl shadow-emerald-900/40">
+                Go to Admin Console
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7-7 7M3 12h18"/></svg>
               </Link>
             </div>
           </section>
