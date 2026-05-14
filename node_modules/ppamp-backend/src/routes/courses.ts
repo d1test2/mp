@@ -79,3 +79,43 @@ coursesRouter.get('/:courseSlug/videos/:videoSlug/progress', requireAuth, async 
   res.json({ progress: prog ?? { positionSec: 0, completed: false } });
 });
 
+coursesRouter.post('/:courseSlug/videos/:videoSlug/progress', requireAuth, async (req, res) => {
+  const bodySchema = z.object({
+    positionSec: z.number().min(0),
+    completed: z.boolean().optional()
+  });
+
+  const parsed = bodySchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
+
+  const { positionSec, completed } = parsed.data;
+
+  const video = await prisma.video.findFirst({
+    where: {
+      slug: req.params.videoSlug,
+      course: { slug: req.params.courseSlug }
+    },
+    select: { id: true }
+  });
+
+  if (!video) return res.status(404).json({ error: 'Video not found' });
+
+  const progress = await prisma.userVideoProgress.upsert({
+    where: { userId_videoId: { userId: req.user!.id, videoId: video.id } },
+    create: {
+      userId: req.user!.id,
+      videoId: video.id,
+      positionSec,
+      completed: completed ?? false,
+      completedAt: completed ? new Date() : null
+    },
+    update: {
+      positionSec,
+      completed: completed ?? false,
+      completedAt: completed ? new Date() : null
+    }
+  });
+
+  res.json({ progress });
+});
+

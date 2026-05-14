@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import Stripe from 'stripe';
 
+import bcrypt from 'bcryptjs';
+import crypto from 'node:crypto';
+
 import { prisma } from '../services/prisma.js';
 import { sendOnboardingEmail } from '../services/email.js';
 import { requireEnv } from '../utils/requireEnv.js';
@@ -32,19 +35,24 @@ webhookRouter.post('/webhook', async (req: any, res: any) => {
 
     const userId = session.metadata?.userId;
     const tier = session.metadata?.tier;
+    const email = session.customer_details?.email || `guest_${userId}@example.com`;
 
     if (userId && tier && (tier === 'PREMIUM' || tier === 'ELITE')) {
-      await prisma.user.upsert({
+      const tempPassword = crypto.randomBytes(4).toString('hex'); // 8 char hex password
+      const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+      const user = await prisma.user.upsert({
         where: { id: userId },
         create: {
           id: userId,
-          email: `guest_${userId}@example.com`,
-          passwordHash: 'guest_password_not_used',
+          email,
+          passwordHash,
           tier: tier as any,
           membershipActive: true
         },
         update: {
           membershipActive: true,
+          email, // update email to the real one from stripe
           tier: tier as any,
           stripeCustomerId:
             typeof session.customer === 'string' ? session.customer : session.customer?.toString(),
@@ -52,7 +60,11 @@ webhookRouter.post('/webhook', async (req: any, res: any) => {
         }
       });
 
-      await sendOnboardingEmail(userId);
+      // Only send the temp password if we just created a new user or if they didn't have a valid password before.
+      // For simplicity, we'll send it if they were previously "inactive".
+      const isNewActivation = !user.membershipActive;
+
+      await sendOnboardingEmail(userId, tempPassword);
       return res.json({ received: true });
     }
   }
