@@ -30,11 +30,12 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*', credentials: true }));
 app.use(morgan('dev'));
 
-// Parse JSON by default.
-app.use(express.json({ limit: '2mb' }));
-
 // Stripe webhook must receive RAW body for signature verification.
+// This MUST come before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+
+// Parse JSON for all other routes.
+app.use(express.json({ limit: '2mb' }));
 
 
 app.use(
@@ -110,6 +111,23 @@ async function ensureSeeded() {
       },
     });
   }
+  // Seed default admin
+  const adminEmail = 'admin@ppamp.com';
+  const bcrypt = await import('bcryptjs').then(m => m.default);
+  const adminPasswordHash = await bcrypt.hash('admin123', 12);
+
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      passwordHash: adminPasswordHash,
+      role: 'ADMIN',
+      membershipActive: true,
+      tier: 'PPIC'
+    }
+  });
+
   console.log('Auto-seed complete.');
 }
 

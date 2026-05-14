@@ -149,7 +149,7 @@ export default function Landing() {
                 View Membership Plans
               </a>
               <Link to="/login" className="rounded-xl bg-white/10 px-8 py-4 text-sm font-black uppercase tracking-widest text-white backdrop-blur-md hover:bg-white/20 transition-all">
-                Student Login
+                Member Login
               </Link>
             </div>
             
@@ -161,7 +161,7 @@ export default function Landing() {
               </div>
               <div>
                 <div className="text-3xl font-black text-white">10k+</div>
-                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Active Students</div>
+                <div className="text-xs font-bold uppercase tracking-wider text-slate-500">Active Members</div>
               </div>
               <div>
                 <div className="text-3xl font-black text-white">24/7</div>
@@ -308,7 +308,7 @@ export default function Landing() {
                 <li><Link to="/" className="hover:text-emerald-400 transition-colors">Courses</Link></li>
                 <li><Link to="/" className="hover:text-emerald-400 transition-colors">Mentorship</Link></li>
                 <li><Link to="/" className="hover:text-emerald-400 transition-colors">Events</Link></li>
-                <li><Link to="/login" className="hover:text-emerald-400 transition-colors">Student Login</Link></li>
+                <li><Link to="/login" className="hover:text-emerald-400 transition-colors">Member Login</Link></li>
               </ul>
             </div>
             <div>
