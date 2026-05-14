@@ -10,9 +10,15 @@ import { coursesRouter } from './routes/courses.js';
 import { webhookRouter } from './routes/stripeWebhook.js';
 import { stripeCheckoutRouter } from './routes/stripeCheckout.js';
 import { adminRouter } from './routes/admin.js';
-import { Prisma } from '@prisma/client';
-const { CourseCategory } = Prisma;
 import { prisma } from './services/prisma.js';
+const CourseCategory: any = {
+  GETTING_STARTED: 'GETTING_STARTED',
+  SOURCING: 'SOURCING',
+  FINANCING: 'FINANCING',
+  LEGAL: 'LEGAL',
+  MANAGEMENT: 'MANAGEMENT',
+  ADVANCED: 'ADVANCED'
+};
 
 
 
