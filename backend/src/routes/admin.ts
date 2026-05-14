@@ -28,4 +28,29 @@ adminRouter.patch('/users/:id/tier', async (req, res) => {
 
   res.json({ user });
 });
+adminRouter.post('/courses', async (req, res) => {
+  const { title, description, categoryId } = req.body;
+  const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  
+  const course = await prisma.course.create({
+    data: { title, description, categoryId, slug }
+  });
+  res.json({ course });
+});
 
+adminRouter.post('/courses/:id/videos', async (req, res) => {
+  const { title, videoUrl, transcript, sortOrder } = req.body;
+  const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
+  
+  const video = await prisma.video.create({
+    data: { 
+      courseId: req.params.id, 
+      title, 
+      videoUrl, 
+      transcript, 
+      sortOrder: sortOrder || 0,
+      slug 
+    }
+  });
+  res.json({ video });
+});

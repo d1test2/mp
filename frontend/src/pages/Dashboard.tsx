@@ -1,12 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+function apiBase(): string {
+  return '';
+}
+
+interface UserProfile {
+  email: string;
+  role: string;
+  tier: string;
+  membershipActive: boolean;
+}
+
 export default function Dashboard() {
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    fetch(`${apiBase()}/api/auth/me`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
   const stats = [
     { label: 'Active Courses', value: '3' },
     { label: 'Modules Finished', value: '12' },
     { label: 'Academy Ranking', value: 'Top 5%' },
   ];
+
+  if (loading) return (
+    <div className="flex min-h-screen items-center justify-center bg-white">
+      <div className="h-10 w-10 animate-spin rounded-full border-4 border-emerald-600 border-t-transparent"></div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-12 font-sans text-slate-600 selection:bg-emerald-100">
@@ -15,19 +48,45 @@ export default function Dashboard() {
         <header className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between mb-16">
           <div>
             <div className="inline-block rounded-full bg-emerald-100 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 border border-emerald-200 mb-4">
-              Member Portal
+              {user?.role === 'ADMIN' ? 'System Administrator' : 'Member Portal'}
             </div>
-            <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-tight">Welcome back.</h1>
+            <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-tight">Welcome back, {user?.email.split('@')[0]}.</h1>
             <p className="mt-2 text-lg text-slate-500">Your property investment journey continues here.</p>
           </div>
-          <Link
-            to="/courses"
-            className="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all hover:scale-105 active:scale-95"
-          >
-            Resume Learning
-            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7-7 7M3 12h18"/></svg>
-          </Link>
+          <div className="flex gap-4">
+            {user?.role === 'ADMIN' && (
+              <Link
+                to="/admin"
+                className="inline-flex items-center gap-3 rounded-2xl bg-white border-2 border-slate-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-900 hover:bg-slate-50 transition-all hover:scale-105 active:scale-95"
+              >
+                Admin Console
+              </Link>
+            )}
+            <Link
+              to="/courses"
+              className="inline-flex items-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-slate-800 shadow-xl shadow-slate-200 transition-all hover:scale-105 active:scale-95"
+            >
+              Resume Learning
+            </Link>
+          </div>
         </header>
+
+        {/* Admin Special Section */}
+        {user?.role === 'ADMIN' && (
+          <section className="mb-12 rounded-[3rem] bg-emerald-600 p-10 text-white shadow-2xl shadow-emerald-200 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
+               <svg className="h-40 w-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            </div>
+            <div className="relative z-10">
+              <h2 className="text-3xl font-black tracking-tight mb-4">Academy Governance</h2>
+              <p className="max-w-xl text-lg font-medium opacity-90 mb-8">You have full administrative control. Upload new courses, manage member tiers, and oversee platform growth from the console.</p>
+              <Link to="/admin" className="inline-flex items-center gap-3 rounded-xl bg-white px-6 py-3 text-xs font-black uppercase tracking-widest text-emerald-600 hover:bg-emerald-50 transition-all">
+                Enter Admin Console
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M14 5l7 7-7 7M3 12h18"/></svg>
+              </Link>
+            </div>
+          </section>
+        )}
 
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {stats.map((stat) => (
@@ -52,18 +111,21 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-8">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-2">Membership Tier</p>
-                  <p className="text-3xl font-black text-slate-900 tracking-tight">ELITE ACCESS</p>
+                  <p className="text-3xl font-black text-slate-900 tracking-tight">{user?.tier || 'MEMBER'} ACCESS</p>
                 </div>
                 <div className="h-16 w-16 rounded-2xl bg-emerald-600 flex items-center justify-center text-white shadow-xl shadow-emerald-200">
                    <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z"/></svg>
                 </div>
               </div>
               <p className="text-sm text-slate-500 leading-relaxed font-medium">
-                You have unrestricted access to all premium sourcing modules, legal templates, and our exclusive community forums.
+                {user?.role === 'ADMIN' 
+                  ? 'As an Administrator, you have unrestricted access to every course and management feature across the platform.'
+                  : `You have unrestricted access to all ${user?.tier} sourcing modules, legal templates, and our exclusive community forums.`
+                }
               </p>
               <div className="mt-10 pt-8 border-t border-slate-200">
                 <Link to="/" className="text-xs font-black uppercase tracking-widest text-emerald-600 hover:text-emerald-700 flex items-center gap-2 transition-colors">
-                  Manage Subscription
+                  {user?.role === 'ADMIN' ? 'Review Site Settings' : 'Manage Subscription'}
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
                 </Link>
               </div>

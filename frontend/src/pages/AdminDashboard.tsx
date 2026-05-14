@@ -10,7 +10,6 @@ interface User {
   role: string;
   tier: string;
   membershipActive: boolean;
-  createdAt: string;
 }
 
 interface Course {
@@ -26,6 +25,12 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState<User[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Create Course Form
+  const [showForm, setShowForm] = useState(false);
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [categoryId, setCategoryId] = useState('GETTING_STARTED');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -57,6 +62,28 @@ export default function AdminDashboard() {
     setUsers(users.map(u => u.id === userId ? { ...u, tier } : u));
   };
 
+  const handleCreateCourse = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    const resp = await fetch(`${apiBase()}/api/admin/courses`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ title, description, categoryId })
+    });
+    
+    if (resp.ok) {
+      setShowForm(false);
+      setTitle('');
+      setDescription('');
+      // Refresh content
+      setTab('members'); // Force toggle
+      setTimeout(() => setTab('content'), 10);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-12 font-sans text-slate-600">
       <div className="mx-auto max-w-7xl">
@@ -65,7 +92,6 @@ export default function AdminDashboard() {
           <p className="mt-2 text-slate-500 font-medium">Academy Governance & Content Distribution</p>
         </header>
 
-        {/* Tabs */}
         <div className="mb-10 flex gap-10 border-b border-slate-200">
           <button 
             onClick={() => setTab('members')}
@@ -127,7 +153,10 @@ export default function AdminDashboard() {
           </div>
         ) : (
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-             <button className="flex h-full flex-col items-center justify-center rounded-[2.5rem] border-4 border-dashed border-slate-200 bg-white p-12 transition-all hover:border-emerald-600 hover:bg-emerald-50 group shadow-sm hover:shadow-xl">
+             <button 
+               onClick={() => setShowForm(true)}
+               className="flex h-full flex-col items-center justify-center rounded-[2.5rem] border-4 border-dashed border-slate-200 bg-white p-12 transition-all hover:border-emerald-600 hover:bg-emerald-50 group shadow-sm hover:shadow-xl"
+             >
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-600 text-white shadow-xl shadow-emerald-200 group-hover:scale-110 transition-transform">
                   <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M12 4v16m8-8H4"/></svg>
                 </div>
@@ -137,20 +166,63 @@ export default function AdminDashboard() {
                <div key={course.id} className="group relative rounded-[2.5rem] bg-white p-8 shadow-sm border border-slate-100 transition-all hover:shadow-2xl hover:shadow-slate-200">
                   <div className="mb-6 flex items-center justify-between">
                     <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">{course.category?.title}</span>
-                    <button className="text-slate-300 hover:text-slate-900 transition-colors">
-                      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/></svg>
-                    </button>
                   </div>
                   <h3 className="mb-4 text-2xl font-black text-slate-900 group-hover:text-emerald-600 transition-colors tracking-tight">{course.title}</h3>
                   <p className="line-clamp-2 text-sm text-slate-500 mb-8 font-medium leading-relaxed">{course.description}</p>
                   <div className="flex gap-4">
-                    <button className="flex-1 rounded-2xl bg-slate-100 py-4 text-xs font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200 transition-colors">Manage</button>
-                    <button className="rounded-2xl bg-slate-50 px-5 py-4 text-slate-300 hover:bg-red-50 hover:text-red-600 transition-colors border border-transparent hover:border-red-100">
-                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
+                    <button className="flex-1 rounded-2xl bg-slate-100 py-4 text-xs font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200 transition-colors">Add Video</button>
                   </div>
                </div>
              ))}
+          </div>
+        )}
+
+        {/* Create Course Modal */}
+        {showForm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+             <div className="w-full max-w-xl rounded-[3rem] bg-white p-10 shadow-2xl animate-in zoom-in-95 duration-300">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tight mb-8">Create New Module</h2>
+                <form onSubmit={handleCreateCourse} className="space-y-6">
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Module Title</label>
+                      <input 
+                        required
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900 focus:border-emerald-600 focus:bg-white outline-none transition-all"
+                        value={title}
+                        onChange={e => setTitle(e.target.value)}
+                      />
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Category</label>
+                      <select 
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900 focus:border-emerald-600 focus:bg-white outline-none transition-all"
+                        value={categoryId}
+                        onChange={e => setCategoryId(e.target.value)}
+                      >
+                         <option value="GETTING_STARTED">Getting Started</option>
+                         <option value="SOURCING">Property Sourcing</option>
+                         <option value="FINANCING">Financing</option>
+                         <option value="LEGAL">Legal & Compliance</option>
+                         <option value="MANAGEMENT">Management</option>
+                         <option value="ADVANCED">Advanced Strategies</option>
+                      </select>
+                   </div>
+                   <div className="space-y-2">
+                      <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Description</label>
+                      <textarea 
+                        required
+                        rows={3}
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-900 focus:border-emerald-600 focus:bg-white outline-none transition-all"
+                        value={description}
+                        onChange={e => setDescription(e.target.value)}
+                      />
+                   </div>
+                   <div className="flex gap-4 pt-4">
+                      <button type="button" onClick={() => setShowForm(false)} className="flex-1 rounded-2xl bg-slate-100 py-4 text-xs font-black uppercase tracking-widest text-slate-900 hover:bg-slate-200">Cancel</button>
+                      <button type="submit" className="flex-1 rounded-2xl bg-emerald-600 py-4 text-xs font-black uppercase tracking-widest text-white hover:bg-emerald-700 shadow-xl shadow-emerald-200 transition-all">Create Module</button>
+                   </div>
+                </form>
+             </div>
           </div>
         )}
       </div>
