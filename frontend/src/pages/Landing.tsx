@@ -8,6 +8,11 @@ const tiers = [
 
 type Tier = 'PREMIUM' | 'ELITE';
 
+function apiBase(): string {
+  // Avoid TS issues with import.meta.env typing.
+  return (import.meta as any)?.env?.VITE_API_BASE ?? 'http://localhost:4000';
+}
+
 export default function Landing() {
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +26,7 @@ export default function Landing() {
       }
 
       const resp = await fetch(
-        `${import.meta.env.VITE_API_BASE ?? 'http://localhost:4000'}/api/stripe/create-checkout-session`,
+        `${apiBase()}/api/stripe/create-checkout-session`,
         {
           method: 'POST',
           headers: {
