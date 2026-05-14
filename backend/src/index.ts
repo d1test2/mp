@@ -53,9 +53,8 @@ app.get('/api/health', (_req: any, res: any) => {
 
 app.use('/api/auth', authRouter);
 app.use('/api/courses', coursesRouter);
-app.use('/api/stripe', webhookRouter);
 app.use('/api/stripe', stripeCheckoutRouter);
-
+app.use('/api/stripe', webhookRouter);
 app.use('/api/admin', adminRouter);
 
 
