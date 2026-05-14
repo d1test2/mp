@@ -10,11 +10,6 @@ export default function Landing() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loading, setLoading] = useState<string | null>(null);
-  
-  // Guest Modal State
-  const [showGuestModal, setShowGuestModal] = useState(false);
-  const [guestEmail, setGuestEmail] = useState('');
-  const [selectedTier, setSelectedTier] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -23,40 +18,26 @@ export default function Landing() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const handleTierClick = (tier: string) => {
-    setSelectedTier(tier);
-    setShowGuestModal(true);
-  };
-
-  const handleGuestCheckout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTier || !guestEmail) return;
-
-    setLoading(selectedTier);
+  const handleCheckout = async (tier: string) => {
+    setLoading(tier);
     try {
-      // 1. Create/Get temporary user record
-      const userResp = await fetch(`${apiBase()}/api/auth/register-guest`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: guestEmail, tier: selectedTier }),
-      });
-      const userData = await userResp.json();
-      if (!userResp.ok) throw new Error(userData.error || 'Registration failed');
-
-      // 2. Create Stripe Session
-      const stripeResp = await fetch(`${apiBase()}/api/stripe/create-checkout-session`, {
+      // Generate a random temporary ID to track this guest session
+      const tempUserId = `guest_${Math.random().toString(36).substring(2, 11)}`;
+      
+      const resp = await fetch(`${apiBase()}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          tier: selectedTier, 
-          userId: userData.userId,
+          tier, 
+          userId: tempUserId,
           origin: window.location.origin 
         }),
       });
-      const { url } = await stripeResp.json();
-      if (url) window.location.href = url;
+      const data = await resp.json();
+      if (data.url) window.location.href = data.url;
+      else throw new Error(data.error || 'Failed to create session');
     } catch (err: any) {
-      alert(err.message || 'Connection error.');
+      alert(err.message || 'Connection error. Please check if backend is running.');
     } finally {
       setLoading(null);
     }
@@ -206,7 +187,7 @@ export default function Landing() {
                 )}
                 <h3 className="text-xs font-black uppercase tracking-[0.3em] text-emerald-500 mb-2">{tier} TIER</h3>
                 <div className="flex items-baseline gap-1 mb-8">
-                  <span className="text-5xl font-black tracking-tight">£{tier === 'ELITE' ? '1,997' : '997'}</span>
+                  <span className="text-5xl font-black tracking-tight">£{tier === 'ELITE' ? '497' : '297'}</span>
                   <span className={`text-xs font-bold uppercase ${tier === 'ELITE' ? 'text-slate-400' : 'text-slate-400'}`}>/ lifetime</span>
                 </div>
                 <ul className="mb-10 space-y-4">
@@ -225,10 +206,11 @@ export default function Landing() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => handleTierClick(tier)}
+                  onClick={() => handleCheckout(tier)}
+                  disabled={loading !== null}
                   className={`w-full rounded-[2rem] py-5 text-xs font-black uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${tier === 'ELITE' ? 'bg-emerald-600 text-white hover:bg-emerald-500' : 'bg-slate-900 text-white hover:bg-slate-800'}`}
                 >
-                  Secure My Spot
+                  {loading === tier ? 'Initiating Checkout...' : 'Secure My Spot'}
                 </button>
               </div>
             ))}
@@ -255,48 +237,6 @@ export default function Landing() {
           </div>
         </div>
       </footer>
-
-      {/* Guest Checkout Modal */}
-      {showGuestModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-           <div className="w-full max-w-md rounded-[3rem] bg-white p-10 shadow-2xl animate-in zoom-in-95 duration-300 relative">
-              <button 
-                onClick={() => setShowGuestModal(false)}
-                className="absolute top-8 right-8 text-slate-400 hover:text-slate-900 transition-colors"
-              >
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path d="M6 18L18 6M6 6l12 12"/></svg>
-              </button>
-              
-              <div className="text-center mb-10">
-                <div className="inline-block rounded-full bg-emerald-50 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-600 mb-4">Final Step</div>
-                <h2 className="text-3xl font-black text-slate-900 tracking-tight">Create your account.</h2>
-                <p className="mt-2 text-sm text-slate-500">We'll use this email to send your login credentials.</p>
-              </div>
-
-              <form onSubmit={handleGuestCheckout} className="space-y-6">
-                 <div className="space-y-2">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Work or Personal Email</label>
-                    <input 
-                      type="email"
-                      required
-                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-6 py-4 text-slate-900 placeholder-slate-400 focus:border-emerald-600 focus:bg-white outline-none transition-all shadow-sm"
-                      placeholder="name@example.com"
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                    />
-                 </div>
-                 <button 
-                  type="submit"
-                  disabled={loading !== null}
-                  className="w-full rounded-2xl bg-emerald-600 py-5 text-xs font-black uppercase tracking-[0.2em] text-white shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all active:scale-95 disabled:opacity-50"
-                 >
-                   {loading ? 'Initiating Checkout...' : `Proceed to Payment (£${selectedTier === 'ELITE' ? '1,997' : '997'})`}
-                 </button>
-                 <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest">Secure Checkout via Stripe</p>
-              </form>
-           </div>
-        </div>
-      )}
     </div>
   );
 }
