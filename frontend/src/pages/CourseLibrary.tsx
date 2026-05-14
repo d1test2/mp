@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 function apiBase(): string {
-  return (import.meta as any)?.env?.VITE_API_BASE ?? '';
+  return '';
 }
 
 interface Course {
@@ -20,7 +20,16 @@ export default function CourseLibrary() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [showSuccess, setShowSuccess] = useState(false);
+
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === '1') {
+      setShowSuccess(true);
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
     fetch(`${apiBase()}/api/courses/library`)
       .then((res) => res.json())
       .then((data) => {
@@ -41,6 +50,23 @@ export default function CourseLibrary() {
   return (
     <div className="min-h-screen bg-slate-950 p-6 md:p-12">
       <div className="mx-auto max-w-7xl">
+        {showSuccess && (
+          <div className="mb-12 flex items-center justify-between rounded-2xl bg-emerald-500/10 p-6 text-emerald-400 border border-emerald-500/20">
+            <div className="flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/30">
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7"/></svg>
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Welcome to the Academy!</h3>
+                <p className="text-sm opacity-80">Your membership is now active. We've sent your login details to your email.</p>
+              </div>
+            </div>
+            <button onClick={() => setShowSuccess(false)} className="text-emerald-400 hover:text-white transition-colors">
+              <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+          </div>
+        )}
+
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-4xl font-bold text-white">Course Library</h1>

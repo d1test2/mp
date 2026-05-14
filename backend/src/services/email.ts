@@ -27,6 +27,15 @@ export async function sendOnboardingEmail(userId: string, tempPassword?: string)
     `
   };
 
-  await sgMail.send(msg as any);
+  try {
+    await sgMail.send(msg as any);
+    console.log(`[Email] Onboarding email sent to ${user.email}`);
+  } catch (err: any) {
+    console.error('[Email] Failed to send onboarding email:', err.message);
+    if (err.response) {
+      console.error('[Email] SendGrid error body:', err.response.body);
+    }
+    // We don't throw here to prevent crashing the whole app (e.g. during webhook)
+  }
 }
 
