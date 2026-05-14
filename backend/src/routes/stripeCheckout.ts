@@ -36,12 +36,17 @@ stripeCheckoutRouter.post('/create-checkout-session', async (req: any, res: any)
   const priceId = tier === 'PREMIUM' ? premiumPriceId : elitePriceId;
 
   const origin = req.body?.origin || req.headers.origin || 'http://localhost:5173';
-  const successUrl = process.env.STRIPE_SUCCESS_URL || `${origin}/dashboard?success=1`;
-  const cancelUrl = process.env.STRIPE_CANCEL_URL || `${origin}/?canceled=1`;
+  let successUrl = process.env.STRIPE_SUCCESS_URL || `${origin}/dashboard?success=1`;
+  let cancelUrl = process.env.STRIPE_CANCEL_URL || `${origin}/?canceled=1`;
+
+  // If the env var is hardcoded to localhost but we are on Replit, override it
+  if (successUrl.includes('localhost') && origin.includes('replit.dev')) {
+    successUrl = `${origin}/dashboard?success=1`;
+    cancelUrl = `${origin}/?canceled=1`;
+  }
 
   console.log('[Stripe Checkout] Creating session.');
   console.log('[Stripe Checkout] Request Body Origin:', req.body?.origin);
-  console.log('[Stripe Checkout] Request Headers Origin:', req.headers.origin);
   console.log('[Stripe Checkout] Final Success URL:', successUrl);
 
   const session = await stripe.checkout.sessions.create({
