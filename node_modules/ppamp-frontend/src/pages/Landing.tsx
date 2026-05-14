@@ -20,10 +20,17 @@ export default function Landing() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
+      console.log('[Landing] token present?', Boolean(token));
+      console.log('[Landing] apiBase', apiBase());
+
       if (!token) {
-        window.location.href = '/login';
+        // Keep the user on this page so we can see the problem in console/network.
+        alert('No token found in localStorage. Backend checkout requires JWT.\n\nOpen DevTools → Console/Network for details.');
         return;
       }
+
+
+      console.log('[Landing] checkout tier', tier);
 
       const resp = await fetch(
         `${apiBase()}/api/stripe/create-checkout-session`,
@@ -37,11 +44,22 @@ export default function Landing() {
         }
       );
 
+      console.log('[Landing] checkout response status', resp.status);
+
       if (!resp.ok) {
-        const data = await resp.json().catch(() => ({}));
+        const text = await resp.text().catch(() => '');
+        let data: any = {};
+        try {
+          data = text ? JSON.parse(text) : {};
+        } catch {
+          data = { error: text };
+        }
+
+        console.log('[Landing] checkout error payload', data);
         alert(data?.error ?? 'Checkout failed');
         return;
       }
+
 
       const data: { url?: string } = await resp.json();
       if (data.url) window.location.href = data.url;
