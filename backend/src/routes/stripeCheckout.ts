@@ -39,6 +39,11 @@ stripeCheckoutRouter.post('/create-checkout-session', async (req: any, res: any)
   const successUrl = process.env.STRIPE_SUCCESS_URL || `${origin}/dashboard?success=1`;
   const cancelUrl = process.env.STRIPE_CANCEL_URL || `${origin}/?canceled=1`;
 
+  console.log('[Stripe Checkout] Creating session.');
+  console.log('[Stripe Checkout] Request Body Origin:', req.body?.origin);
+  console.log('[Stripe Checkout] Request Headers Origin:', req.headers.origin);
+  console.log('[Stripe Checkout] Final Success URL:', successUrl);
+
   const session = await stripe.checkout.sessions.create({
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
