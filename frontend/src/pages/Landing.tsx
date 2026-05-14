@@ -113,6 +113,12 @@ export default function Landing() {
     }
   };
 
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('token'));
+  }, []);
+
   return (
     <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-emerald-100 selection:text-emerald-900">
       
@@ -123,8 +129,11 @@ export default function Landing() {
             <img src={LOGO_URL} alt="Logo" className="h-12 w-auto md:h-16" />
           </Link>
           <div className="flex items-center gap-6">
-            <Link to="/login" className="hidden text-sm font-bold uppercase tracking-widest text-slate-700 hover:text-emerald-600 md:block transition-colors">Login</Link>
-            <a href="#plans" className="rounded-full bg-emerald-600 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-white shadow-md hover:bg-emerald-700 transition-all hover:scale-105 active:scale-95">Start Learning</a>
+            {isLoggedIn ? (
+              <Link to="/dashboard" className="rounded-full bg-emerald-600 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all hover:scale-105 active:scale-95">Dashboard</Link>
+            ) : (
+              <Link to="/login" className="rounded-full bg-emerald-600 px-6 py-2.5 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-emerald-200 hover:bg-emerald-700 transition-all hover:scale-105 active:scale-95">Member Login</Link>
+            )}
           </div>
         </div>
       </nav>
