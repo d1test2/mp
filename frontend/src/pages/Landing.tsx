@@ -90,7 +90,11 @@ export default function Landing() {
       const resp = await fetch(`${apiBase()}/api/stripe/create-checkout-session`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tier, userId: guestId })
+        body: JSON.stringify({ 
+          tier, 
+          userId: guestId, 
+          origin: window.location.origin 
+        })
       });
 
       if (!resp.ok) {

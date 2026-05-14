@@ -35,7 +35,7 @@ stripeCheckoutRouter.post('/create-checkout-session', async (req: any, res: any)
 
   const priceId = tier === 'PREMIUM' ? premiumPriceId : elitePriceId;
 
-  const origin = req.headers.origin || 'http://localhost:5173';
+  const origin = req.body?.origin || req.headers.origin || 'http://localhost:5173';
   const successUrl = process.env.STRIPE_SUCCESS_URL || `${origin}/dashboard?success=1`;
   const cancelUrl = process.env.STRIPE_CANCEL_URL || `${origin}/?canceled=1`;
 
