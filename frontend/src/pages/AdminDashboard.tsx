@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 function apiBase(): string {
-  return (import.meta as any)?.env?.VITE_API_BASE ?? 'http://localhost:4000';
+  return (import.meta as any)?.env?.VITE_API_BASE ?? '';
 }
 
 interface User {

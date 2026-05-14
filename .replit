@@ -2,19 +2,15 @@ modules = ["nodejs-20"]
 run = "npm install && npm run dev --prefix backend & npm run dev --prefix frontend"
 
 [[ports]]
-localPort = 4000
-externalPort = 3001
-
-[[ports]]
-localPort = 5000
-externalPort = 80
-
-[[ports]]
-localPort = 5001
+localPort = 3000
 externalPort = 3000
 
 [[ports]]
-localPort = 5173
+localPort = 4000
+externalPort = 3000
+
+[[ports]]
+localPort = 5000
 externalPort = 80
 
 [agent]
@@ -52,9 +48,15 @@ outputType = "webview"
 name = "Start backend"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "npm run dev --workspace=backend"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "PORT=3000 npm run dev --workspace=backend"
+waitForPort = 3000
+
+[userenv]
+
+[userenv.shared]
+PORT = "3000"

@@ -65,8 +65,7 @@ const tiers = [
 ];
 
 function apiBase(): string {
-  const base = (import.meta as any)?.env?.VITE_API_BASE ?? 'http://localhost:4000';
-  return base.trim(); // Remove any accidental spaces
+  return ((import.meta as any)?.env?.VITE_API_BASE ?? '').trim();
 }
 
 export default function Landing() {

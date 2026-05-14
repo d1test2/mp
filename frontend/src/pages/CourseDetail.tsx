@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 function apiBase(): string {
-  return (import.meta as any)?.env?.VITE_API_BASE ?? 'http://localhost:4000';
+  return (import.meta as any)?.env?.VITE_API_BASE ?? '';
 }
 
 interface Video {

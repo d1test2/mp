@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function apiBase(): string {
-  return (import.meta as any)?.env?.VITE_API_BASE ?? 'http://localhost:4000';
+  return (import.meta as any)?.env?.VITE_API_BASE ?? '';
 }
 
 export default function Login() {
