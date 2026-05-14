@@ -6,10 +6,6 @@ localPort = 3000
 externalPort = 3000
 
 [[ports]]
-localPort = 4000
-externalPort = 3000
-
-[[ports]]
 localPort = 5173
 externalPort = 80
 
@@ -55,8 +51,6 @@ outputType = "console"
 task = "shell.exec"
 args = "PORT=3000 npm run dev --workspace=backend"
 waitForPort = 3000
-
-[userenv]
 
 [userenv.shared]
 PORT = "3000"
