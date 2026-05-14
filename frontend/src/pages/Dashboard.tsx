@@ -21,9 +21,13 @@ export default function Dashboard() {
     fetch(`${apiBase()}/api/auth/me`, {
       headers: { 'Authorization': `Bearer ${token}` }
     })
-      .then(res => res.json())
+      .then(async (res) => {
+        if (!res.ok) return null;
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
+      })
       .then(data => {
-        setUser(data.user);
+        if (data && data.user) setUser(data.user);
         setLoading(false);
       })
       .catch(() => setLoading(false));

@@ -35,14 +35,20 @@ export default function CourseDetail() {
         'Authorization': `Bearer ${token}`
       }
     })
-      .then((res) => {
+      .then(async (res) => {
         if (res.status === 401) throw new Error('Please login to access this course.');
         if (res.status === 403) throw new Error('Your membership tier does not include this course.');
-        return res.json();
+        if (!res.ok) throw new Error('Failed to load course details.');
+        const text = await res.text();
+        return text ? JSON.parse(text) : null;
       })
       .then((data) => {
-        setCourse(data.course);
-        setActiveVideo(data.course.videos[0]);
+        if (data && data.course) {
+          setCourse(data.course);
+          if (data.course.videos && data.course.videos.length > 0) {
+            setActiveVideo(data.course.videos[0]);
+          }
+        }
         setLoading(false);
       })
       .catch((err) => {
@@ -52,7 +58,13 @@ export default function CourseDetail() {
   }, [slug]);
 
   const getEmbedUrl = (url: string) => {
-    const id = url.split('/').pop()?.split('?')[0];
+    // Handle both youtube.com/watch?v=ID and youtu.be/ID
+    let id = '';
+    if (url.includes('v=')) {
+      id = url.split('v=')[1].split('&')[0];
+    } else {
+      id = url.split('/').pop()?.split('?')[0] || '';
+    }
     return `https://www.youtube.com/embed/${id}`;
   };
 
@@ -109,6 +121,11 @@ export default function CourseDetail() {
                 allowFullScreen
               ></iframe>
             )}
+            {!activeVideo && (
+              <div className="h-full w-full flex items-center justify-center bg-slate-100 text-slate-400 font-bold uppercase tracking-widest">
+                 No Video Selected
+              </div>
+            )}
           </div>
 
           <div className="mt-12 bg-white rounded-[3rem] p-10 shadow-sm border border-slate-100">
@@ -161,33 +178,37 @@ export default function CourseDetail() {
                Course Syllabus
             </h2>
             <div className="space-y-4">
-              {course.videos.map((video, idx) => (
-                <button
-                  key={video.id}
-                  onClick={() => setActiveVideo(video)}
-                  className={`group relative flex w-full items-center gap-6 rounded-3xl p-6 text-left transition-all duration-300 border ${
-                    activeVideo?.id === video.id 
-                      ? 'bg-emerald-50 border-emerald-200 shadow-sm' 
-                      : 'bg-white border-transparent hover:border-slate-100 hover:bg-slate-50'
-                  }`}
-                >
-                  <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-sm font-black transition-all ${
-                    activeVideo?.id === video.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-slate-100 text-slate-400'
-                  }`}>
-                    {idx + 1}
-                  </div>
-                  <div className="flex-1">
-                    <p className={`text-sm font-black uppercase tracking-widest ${activeVideo?.id === video.id ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-900'}`}>
-                      {video.title}
-                    </p>
-                    <div className="mt-2 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                       <span className={activeVideo?.id === video.id ? 'text-emerald-600' : ''}>Active Module</span>
-                       <span className="h-1 w-1 rounded-full bg-slate-200"></span>
-                       <span>15m</span>
+              {course.videos && course.videos.length > 0 ? (
+                course.videos.map((video, idx) => (
+                  <button
+                    key={video.id}
+                    onClick={() => setActiveVideo(video)}
+                    className={`group relative flex w-full items-center gap-6 rounded-3xl p-6 text-left transition-all duration-300 border ${
+                      activeVideo?.id === video.id 
+                        ? 'bg-emerald-50 border-emerald-200 shadow-sm' 
+                        : 'bg-white border-transparent hover:border-slate-100 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div className={`h-12 w-12 rounded-2xl flex items-center justify-center text-sm font-black transition-all ${
+                      activeVideo?.id === video.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-200' : 'bg-slate-100 text-slate-400'
+                    }`}>
+                      {idx + 1}
                     </div>
-                  </div>
-                </button>
-              ))}
+                    <div className="flex-1">
+                      <p className={`text-sm font-black uppercase tracking-widest ${activeVideo?.id === video.id ? 'text-slate-900' : 'text-slate-500 group-hover:text-slate-900'}`}>
+                        {video.title}
+                      </p>
+                      <div className="mt-2 flex items-center gap-4 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                         <span className={activeVideo?.id === video.id ? 'text-emerald-600' : ''}>Active Module</span>
+                         <span className="h-1 w-1 rounded-full bg-slate-200"></span>
+                         <span>15m</span>
+                      </div>
+                    </div>
+                  </button>
+                ))
+              ) : (
+                <p className="text-sm text-slate-400 italic">No videos found for this course.</p>
+              )}
             </div>
           </div>
         </aside>

@@ -16,13 +16,11 @@ dotenv.config();
 const app = express();
 
 // Stripe webhook must receive RAW body for signature verification.
-// This MUST come before express.json()
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors({ origin: process.env.CORS_ORIGIN ?? '*', credentials: true }));
 app.use(morgan('dev'));
 
-// Parse JSON for all other routes.
 app.use(express.json({ limit: '2mb' }));
 
 app.use(
@@ -33,10 +31,8 @@ app.use(
   })
 );
 
-// Health check
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-// API Routes
 app.use('/api/auth', authRouter);
 app.use('/api/courses', coursesRouter);
 app.use('/api/stripe', stripeCheckoutRouter);
@@ -44,50 +40,62 @@ app.use('/api/stripe', webhookRouter);
 app.use('/api/admin', adminRouter);
 
 async function ensureSeeded() {
-  const count = await prisma.courseCategoryModel.count();
+  console.log('[System] Verifying system data...');
+
+  const categories = [
+    { id: 'GETTING_STARTED', title: 'Getting Started', slug: 'getting-started' },
+    { id: 'SOURCING', title: 'Property Sourcing', slug: 'sourcing' },
+    { id: 'FINANCING', title: 'Financing Deals', slug: 'financing' },
+    { id: 'LEGAL', title: 'Legal & Compliance', slug: 'legal' },
+    { id: 'MANAGEMENT', title: 'Property Management', slug: 'management' },
+    { id: 'ADVANCED', title: 'Advanced Strategies', slug: 'advanced' },
+  ];
   
-  if (count === 0) {
-    console.log('Database empty. Running initial seed...');
-    const categories = [
-      { id: 'GETTING_STARTED', title: 'Getting Started', slug: 'getting-started' },
-      { id: 'SOURCING', title: 'Property Sourcing', slug: 'sourcing' },
-      { id: 'FINANCING', title: 'Financing Deals', slug: 'financing' },
-      { id: 'LEGAL', title: 'Legal & Compliance', slug: 'legal' },
-      { id: 'MANAGEMENT', title: 'Property Management', slug: 'management' },
-      { id: 'ADVANCED', title: 'Advanced Strategies', slug: 'advanced' },
-    ];
-    
-    for (const cat of categories) {
-      await prisma.courseCategoryModel.upsert({
-        where: { id: cat.id },
-        update: cat,
-        create: cat,
-      });
-    }
-
-    const course = await prisma.course.create({
-      data: {
-        title: 'Introduction to The Academy',
-        slug: 'intro-to-academy',
-        description: 'Learn the basics of our platform and how to navigate the courses.',
-        categoryId: 'GETTING_STARTED',
-      }
-    });
-
-    await prisma.video.create({
-      data: {
-        id: 'video-intro',
-        courseId: course.id,
-        title: 'Welcome to the Academy',
-        slug: 'welcome',
-        videoUrl: 'https://youtu.be/NnA4P4ypNeQ',
-        sortOrder: 0,
-        transcript: 'Welcome to the Premier Property Academy. We are excited to have you here.',
-      },
+  for (const cat of categories) {
+    await prisma.courseCategoryModel.upsert({
+      where: { id: cat.id },
+      update: cat,
+      create: cat,
     });
   }
 
-  // Seed/Update default admin
+  // Ensure Default Course exists
+  const introCourse = await prisma.course.upsert({
+    where: { slug: 'intro-to-academy' },
+    update: {
+      title: 'Introduction to The Academy',
+      description: 'Learn the basics of our platform and how to navigate the courses.',
+      categoryId: 'GETTING_STARTED',
+    },
+    create: {
+      title: 'Introduction to The Academy',
+      slug: 'intro-to-academy',
+      description: 'Learn the basics of our platform and how to navigate the courses.',
+      categoryId: 'GETTING_STARTED',
+    }
+  });
+
+  // Ensure Intro Video exists
+  await prisma.video.upsert({
+    where: { id: 'video-intro' },
+    update: {
+      courseId: introCourse.id,
+      title: 'Welcome to the Academy',
+      videoUrl: 'https://youtu.be/NnA4P4ypNeQ',
+      sortOrder: 0,
+    },
+    create: {
+      id: 'video-intro',
+      courseId: introCourse.id,
+      title: 'Welcome to the Academy',
+      slug: 'welcome',
+      videoUrl: 'https://youtu.be/NnA4P4ypNeQ',
+      sortOrder: 0,
+      transcript: 'Welcome to the Premier Property Academy. We are excited to have you here.',
+    },
+  });
+
+  // Seed Admin
   const adminEmail = 'admin@premierproperty.com';
   const bcrypt = await import('bcryptjs').then(m => m.default);
   const adminPasswordHash = await bcrypt.hash('admin123', 12);
@@ -108,7 +116,7 @@ async function ensureSeeded() {
     }
   });
 
-  console.log('Auto-seed complete.');
+  console.log('[System] Data verification complete.');
 }
 
 const port = Number(process.env.PORT ?? 4000);
