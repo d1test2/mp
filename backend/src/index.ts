@@ -10,7 +10,8 @@ import { coursesRouter } from './routes/courses.js';
 import { webhookRouter } from './routes/stripeWebhook.js';
 import { stripeCheckoutRouter } from './routes/stripeCheckout.js';
 import { adminRouter } from './routes/admin.js';
-import { CourseCategory } from '@prisma/client';
+import { Prisma } from '@prisma/client';
+const { CourseCategory } = Prisma;
 import { prisma } from './services/prisma.js';
 
 
