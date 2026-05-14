@@ -7,7 +7,6 @@ import { requireEnv } from '../utils/requireEnv.js';
 
 export const webhookRouter = Router();
 
-
 const STRIPE_SECRET_KEY = requireEnv('STRIPE_SECRET_KEY');
 const STRIPE_WEBHOOK_SECRET = requireEnv('STRIPE_WEBHOOK_SECRET');
 
@@ -35,9 +34,16 @@ webhookRouter.post('/webhook', async (req: any, res: any) => {
     const tier = session.metadata?.tier;
 
     if (userId && tier && (tier === 'PREMIUM' || tier === 'ELITE')) {
-      await prisma.user.update({
+      await prisma.user.upsert({
         where: { id: userId },
-        data: {
+        create: {
+          id: userId,
+          email: `guest_${userId}@example.com`,
+          passwordHash: 'guest_password_not_used',
+          tier: tier as any,
+          membershipActive: true
+        },
+        update: {
           membershipActive: true,
           tier: tier as any,
           stripeCustomerId:
@@ -47,11 +53,10 @@ webhookRouter.post('/webhook', async (req: any, res: any) => {
       });
 
       await sendOnboardingEmail(userId);
+      return res.json({ received: true });
     }
   }
 
   res.json({ received: true });
 });
-
-
 

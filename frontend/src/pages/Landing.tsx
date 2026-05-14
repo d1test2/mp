@@ -37,10 +37,15 @@ export default function Landing() {
         {
           method: 'POST',
           headers: {
-            'content-type': 'application/json',
-            authorization: `Bearer ${token}`
+            'content-type': 'application/json'
           },
-          body: JSON.stringify({ tier })
+
+          body: JSON.stringify({
+            tier,
+            // guest userId is created client-side for now (placeholder)
+            userId: localStorage.getItem('guestUserId') ?? crypto.randomUUID()
+          })
+
         }
       );
 
