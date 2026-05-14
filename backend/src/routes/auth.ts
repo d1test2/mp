@@ -10,6 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET ?? 'dev_secret_change_me';
 
 export const authRouter = Router();
 
+authRouter.get('/me', requireAuth, async (req, res) => {
+  const user = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    select: { id: true, email: true, role: true, tier: true, membershipActive: true }
+  });
+  res.json({ user });
+});
+
 authRouter.post('/register', async (req, res) => {
   const bodySchema = z.object({
     email: z.string().email(),
@@ -85,4 +93,3 @@ authRouter.post('/change-password', requireAuth, async (req, res) => {
 
   res.json({ ok: true });
 });
-

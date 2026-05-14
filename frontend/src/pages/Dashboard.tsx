@@ -6,6 +6,7 @@ function apiBase(): string {
 }
 
 interface UserProfile {
+  id: string;
   email: string;
   role: string;
   tier: string;
@@ -54,7 +55,9 @@ export default function Dashboard() {
             <div className="inline-block rounded-full bg-emerald-100 px-4 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-700 border border-emerald-200 mb-4">
               {user?.role === 'ADMIN' ? 'System Administrator' : 'Member Portal'}
             </div>
-            <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-tight">Welcome back, {user?.email.split('@')[0]}.</h1>
+            <h1 className="text-5xl font-black text-slate-900 tracking-tight leading-tight">
+              Welcome back, {user?.email ? user.email.split('@')[0] : 'Member'}.
+            </h1>
             <p className="mt-2 text-lg text-slate-500">Your property investment journey continues here.</p>
           </div>
           <div className="flex gap-4">
@@ -67,7 +70,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        {/* Admin ULTRA PROMINENT Section */}
+        {/* Admin Section */}
         {user?.role === 'ADMIN' && (
           <section className="mb-16 rounded-[3rem] bg-slate-900 p-12 text-white shadow-3xl relative overflow-hidden group border-4 border-emerald-500/20">
             <div className="absolute top-0 right-0 p-12 opacity-10 group-hover:scale-110 transition-transform duration-700">
@@ -119,7 +122,7 @@ export default function Dashboard() {
               <p className="text-sm text-slate-500 leading-relaxed font-medium">
                 {user?.role === 'ADMIN' 
                   ? 'As an Administrator, you have unrestricted access to every course and management feature across the platform.'
-                  : `You have unrestricted access to all ${user?.tier} sourcing modules, legal templates, and our exclusive community forums.`
+                  : `You have unrestricted access to all ${user?.tier || 'PREMIUM'} sourcing modules, legal templates, and our exclusive community forums.`
                 }
               </p>
               <div className="mt-10 pt-8 border-t border-slate-200">
