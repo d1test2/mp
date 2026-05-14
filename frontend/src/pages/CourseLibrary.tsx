@@ -57,7 +57,7 @@ export default function CourseLibrary() {
       {/* Top Navigation */}
       <nav className="border-b border-slate-200 bg-white/80 backdrop-blur-md sticky top-0 z-40 shadow-sm">
         <div className="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
-           <Link to="/" className="text-xl font-black text-slate-900 tracking-tighter">PPAMP <span className="text-emerald-600">ACADEMY</span></Link>
+           <Link to="/" className="text-xl font-black text-slate-900 tracking-tighter">PREMIER <span className="text-emerald-600">ACADEMY</span></Link>
            <div className="flex items-center gap-8">
               <Link to="/dashboard" className="text-sm font-bold text-slate-600 hover:text-emerald-600 transition-colors">My Learning</Link>
               <button onClick={handleLogout} className="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Logout</button>

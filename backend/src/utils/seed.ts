@@ -32,8 +32,8 @@ async function main() {
 
   const dummyCourses = [
     {
-      title: 'Introduction to PPAMP',
-      slug: 'intro-to-ppamp',
+      title: 'Introduction to The Academy',
+      slug: 'intro-to-academy',
       description: 'Learn the basics of our platform and how to navigate the courses.',
       categoryId: CourseCategory.GETTING_STARTED,
     },

@@ -50,7 +50,7 @@ export default function Login() {
 
       <div className="relative w-full max-w-md">
         <div className="mb-12 text-center">
-           <Link to="/" className="text-3xl font-black text-slate-900 tracking-tighter">PPAMP <span className="text-emerald-600">ACADEMY</span></Link>
+           <Link to="/" className="text-3xl font-black text-slate-900 tracking-tighter">PREMIER <span className="text-emerald-600">ACADEMY</span></Link>
         </div>
 
         <div className="rounded-[3rem] bg-white p-10 shadow-2xl shadow-slate-200 border border-slate-100">

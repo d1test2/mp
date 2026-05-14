@@ -23,11 +23,12 @@ adminRouter.patch('/users/:id/tier', async (req, res) => {
 
   const user = await prisma.user.update({
     where: { id: req.params.id },
-    data: { tier, membershipActive: tier === 'PPIC' ? true : true }
+    data: { tier, membershipActive: true }
   });
 
   res.json({ user });
 });
+
 adminRouter.post('/courses', async (req, res) => {
   const { title, description, categoryId } = req.body;
   const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
@@ -53,4 +54,10 @@ adminRouter.post('/courses/:id/videos', async (req, res) => {
     }
   });
   res.json({ video });
+});
+
+adminRouter.post('/users/:id/resend-email', async (req, res) => {
+  const { sendOnboardingEmail } = await import('../services/email.js');
+  await sendOnboardingEmail(req.params.id, "Please check your previous records for your password.");
+  res.json({ success: true });
 });

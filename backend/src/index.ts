@@ -67,8 +67,8 @@ async function ensureSeeded() {
 
     const course = await prisma.course.create({
       data: {
-        title: 'Introduction to PPAMP',
-        slug: 'intro-to-ppamp',
+        title: 'Introduction to The Academy',
+        slug: 'intro-to-academy',
         description: 'Learn the basics of our platform and how to navigate the courses.',
         categoryId: 'GETTING_STARTED',
       }
@@ -88,7 +88,7 @@ async function ensureSeeded() {
   }
 
   // Seed/Update default admin
-  const adminEmail = 'admin@ppamp.com';
+  const adminEmail = 'admin@premierproperty.com';
   const bcrypt = await import('bcryptjs').then(m => m.default);
   const adminPasswordHash = await bcrypt.hash('admin123', 12);
 
