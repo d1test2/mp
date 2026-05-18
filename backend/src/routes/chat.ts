@@ -126,19 +126,29 @@ chatRouter.post('/', requireAuth, async (req: any, res: any) => {
     return res.status(502).json({ error: e?.message ?? 'DeepSeek failed' });
   }
 
-  // Persist to DB
-  await prisma.aIChat.create({
-    data: {
-      userId,
-      question,
-      answer,
-      upgradeOffered: !!upgradePrompt,
-      suggestedTier: suggestedTier as any,
-    },
-  });
+  // Persist to DB (AIChat table may not exist yet during early rollout)
+  // If AIChat model/table isn't ready, we still return the answer.
+  try {
+    // @ts-expect-error - AIChat may not exist in current Prisma schema
+    if (prisma.aIChat?.create) {
+      // @ts-expect-error - AIChat may not exist in current Prisma schema
+      await prisma.aIChat.create({
+        data: {
+          userId,
+          question,
+          answer,
+          upgradeOffered: !!upgradePrompt,
+          suggestedTier: suggestedTier as any,
+        },
+      });
+    }
+  } catch (e) {
+    console.warn('[Chat] Failed to persist AI chat history:', (e as any)?.message ?? e);
+  }
 
   res.json({ answer, upgradePrompt: upgradePrompt || null, suggestedTier });
 });
+
 
 export default chatRouter;
 
