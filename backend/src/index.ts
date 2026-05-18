@@ -10,6 +10,8 @@ import { coursesRouter } from './routes/courses.js';
 import { stripeCheckoutRouter } from './routes/stripeCheckout.js';
 import { webhookRouter } from './routes/stripeWebhook.js';
 import { adminRouter } from './routes/admin.js';
+import { chatRouter } from './routes/chat.js';
+
 
 dotenv.config();
 
@@ -38,6 +40,8 @@ app.use('/api/courses', coursesRouter);
 app.use('/api/stripe', stripeCheckoutRouter);
 app.use('/api/stripe', webhookRouter);
 app.use('/api/admin', adminRouter);
+app.use('/api/chat', chatRouter);
+
 
 async function ensureSeeded() {
   console.log('[System] Verifying system data...');

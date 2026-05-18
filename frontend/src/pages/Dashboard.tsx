@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AIChat from '../components/AIChat';
+
 
 function apiBase(): string {
   return '';
@@ -102,6 +104,7 @@ export default function Dashboard() {
         <div className="mt-12 grid gap-10 lg:grid-cols-2">
           {/* Membership Card */}
           <section className="rounded-[3rem] bg-white p-10 border border-slate-100 shadow-sm relative overflow-hidden">
+
             <div className="absolute -top-24 -right-24 h-64 w-64 bg-emerald-50 rounded-full blur-[80px]" />
             
             <h2 className="text-xl font-black text-slate-900 uppercase tracking-widest flex items-center gap-3 mb-8">
@@ -156,6 +159,8 @@ export default function Dashboard() {
           </section>
         </div>
       </div>
+      <AIChat />
     </div>
   );
 }
+

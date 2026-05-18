@@ -7,5 +7,8 @@
   ],
   "devDependencies": {
     "@types/node": "^25.7.0"
+  },
+  "dependencies": {
+    "deepseek": "^0.0.2"
   }
 }

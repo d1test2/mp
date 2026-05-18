@@ -1,53 +1,54 @@
-# PPAMP — Implementation Checklist
+# TODO - Premier Property Academy (Modules + Resources + DeepSeek AI Bot)
 
-## Plan Approval
-- [x] Confirm monorepo scaffold (backend/ + frontend/) 
+## Step 1 — Prep
+- [x] Installed `deepseek` dependency in `backend/`
 
-## Step 1 — Scaffold monorepo
-- [ ] Create root structure: backend/, frontend/
-- [ ] Add backend package + ts/js setup
-- [ ] Add frontend package + React + Tailwind setup
 
-## Step 2 — Backend foundation
-- [ ] Implement Express server
-- [ ] Configure PostgreSQL connection
-- [ ] Add JWT auth (register/login)
-- [ ] Add password hashing (bcrypt/argon2)
-- [ ] Add rate limiting + validation
+## Step 2 — Prisma schema extension
+- [ ] Update `backend/prisma/schema.prisma`:
 
-## Step 3 — Database schema
-- [ ] Create tables for users, tiers/entitlements, courses/categories, video progress
-- [ ] Add indexes
-- [ ] Add migrations (Prisma recommended)
+  - Add `Module`
+  - Add `VideoResource`
+  - Add `AIChat`
+  - Add `moduleId` relation to `Video`
+- [ ] Add/adjust any fields required for drip tracking and membership start date
 
-## Step 4 — Course access + progress
-- [ ] Implement course library + detail endpoints
-- [ ] Implement RBAC middleware
-- [ ] Implement progress tracking (video position/completion)
+## Step 3 — Prisma migration + seed
+- [ ] Run `npx prisma migrate dev --name add_modules_resources_ai_chat`
+- [ ] Update `backend/src/utils/seed.ts` to create default modules and assign videos to modules
 
-## Step 5 — Stripe memberships
-- [ ] Implement Stripe checkout session creation (Premium/Elite)
-- [ ] Implement webhook handler
-- [ ] Activate membership + persist tier in DB
+## Step 4 — Backend endpoints
+- [ ] Add new routes:
+  - `GET /api/courses/:courseId/modules`
+  - `GET /api/videos/:videoId/resources`
+  - `POST /api/chat` (DeepSeek, no OpenAI)
+  - (Optional for now) `GET /api/chat/history`
+- [ ] Mount new chat/modules/resources routers in `backend/src/index.ts`
 
-## Step 6 — SendGrid onboarding
-- [ ] Implement SendGrid email after successful activation
+## Step 5 — Drip logic
+- [ ] Implement drip unlock logic:
+  - Determine membership start date
+  - Unlock modules/videos based on `dripDays`
+- [ ] Expose drip status as needed by UI
 
-## Step 7 — Admin + analytics
-- [ ] Admin RBAC + endpoints (users/courses/categories)
-- [ ] Basic analytics endpoints
+## Step 6 — Stripe membership linkage
+- [ ] Ensure webhook updates any membership start timestamp used by drip logic
 
-## Step 8 — Frontend pages (basic UI only)
-- [ ] Landing page tier selection + checkout
-- [ ] Dashboard (stats + progress)
-- [ ] Course library + detail w/ player + transcript/resources placeholders
-- [ ] Membership upgrade page
-- [ ] Profile settings (password/email)
-- [ ] Admin dashboard (basic)
+## Step 7 — Frontend UI updates
+- [ ] Update `frontend/src/pages/Dashboard.tsx`:
+  - show current tier + membershipActive
+  - show upgrade prompts
+- [ ] Update `frontend/src/pages/CourseDetail.tsx`:
+  - replace flat videos view with modules view
+  - enforce locked/unlocked based on drip
+- [ ] Add `frontend/src/components/AIChat.tsx` and integrate into dashboard/course pages
 
-## Step 9 — Local verification
-- [ ] Backend run + API health check
-- [ ] Frontend run + ensure API integration
-- [ ] Verify webhook flow with Stripe CLI (when ready)
+## Step 8 — Manual testing
+- [ ] Test modules endpoint via browser/Postman
+- [ ] Test resources endpoint via browser/Postman
+- [ ] Test `POST /api/chat` using an authenticated token
 
+## Step 9 — Deployment notes
+- [ ] Add `DEEPSEEK_API_KEY` to hosting env vars
+- [ ] Verify webhook + Stripe price IDs are correct
 

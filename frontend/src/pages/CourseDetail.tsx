@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import AIChat from '../components/AIChat';
+
 
 function apiBase(): string {
   return '';
@@ -213,6 +215,8 @@ export default function CourseDetail() {
           </div>
         </aside>
       </div>
+      <AIChat />
     </div>
   );
 }
+
